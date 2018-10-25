@@ -12,4 +12,4 @@ class Block{
     }
 }
 
-modeule.exports.Block = Block;
+module.exports.Block = Block;
