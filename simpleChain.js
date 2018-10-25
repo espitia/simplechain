@@ -137,7 +137,7 @@ let bchain = new Blockchain();
 
 // (function theLoop (i) {
 //     setTimeout(function () {
-//         let blockTest = new Block("Test Block - " + (i + 1));
+//         let blockTest = new BlockClass.Block("Test Block - " + (i + 1));
 //         bchain.addBlock(blockTest).then((result) => {
 //             console.log(result);
 // 						console.log('\n\n\n')
@@ -147,7 +147,7 @@ let bchain = new Blockchain();
 //     }, 3000);
 //   })(0);
 
-// bchain.addBlock(new Block('satoshi - 2009')).then(newBlock => { console.log(`new block has been added!`)}).catch(error => console.log(error))
+// bchain.addBlock(new BlockClass.Block('satoshi - 2009')).then(newBlock => { console.log(`new block has been added!`)}).catch(error => console.log(error))
 // bchain.getBlock(0).then(block => console.log(`Block retreived: \n`, block)).catch(error => console.log(error))
 // bchain.getBlockHeight().then(height => console.log(`Block height is: ${height}`)).catch(error => console.log(error))
 // bchain.validateBlockAtHeight(0).then(success => console.log(`Block was validated: ${success}`)).catch(error => console.log(error))
