@@ -4,6 +4,7 @@
 
 const SHA256 = require('crypto-js/sha256');
 const db = require('./levelSandbox.js')
+const BlockClass = require('./Block.js')
 
 /* ===== Blockchain Class ==========================
 |  Class with a constructor for new blockchain 		|
@@ -14,7 +15,7 @@ class Blockchain{
 		this.getBlockHeight()
 			.then(blockHeight => {
 				if (blockHeight == -1) {
-					this.addBlock(new Block("First block in the chain - Genesis block"));
+					this.addBlock(new BlockClass.Block("First block in the chain - Genesis block"));
 					console.log(`Genesis block has been created!`)
 				}
 			})
