@@ -12,18 +12,7 @@ Installing Node and NPM is pretty straightforward using the installer package av
 
 ### Configuring your project
 
-- Use NPM to initialize your project and create package.json to store project dependencies.
-```
-npm init
-```
-- Install crypto-js with --save flag to save dependency to our package.json file
-```
-npm install crypto-js --save
-```
-- Install level with --save flag
-```
-npm install level --save
-```
+- Make sure to install dependencies 
 
 ## Testing
 
@@ -38,11 +27,19 @@ node
 ```
 let blockchain = new Blockchain();
 ```
-5: Generate 10 blocks using a for loop
+5: Generate 10 blocks using a for loop *with a timer* in between blocks
 ```
-for (var i = 0; i <= 10; i++) {
-  blockchain.addBlock(new Block("test data "+i));
-}
+(function theLoop (i) {
+    setTimeout(function () {
+        let blockTest = new BlockClass.Block("Test Block - " + (i + 1));
+        bchain.addBlock(blockTest).then((result) => {
+            console.log(result);
+						console.log('\n\n\n')
+            i++;
+            if (i < 10) theLoop(i);
+        });
+    }, 3000);
+  })(0);
 ```
 6: Validate blockchain
 ```
@@ -58,4 +55,18 @@ for (var i = 0; i < inducedErrorBlocks.length; i++) {
 8: Validate blockchain. The chain should now fail with blocks 2,4, and 7.
 ```
 blockchain.validateChain();
+```
+
+## Endpoints
+
+There are two endpoints you can call to interact with the chain. 
+
+Retrieve a block at a specified blockheight:
+```
+GET /block/:blockHeight
+```
+
+Generate a new block passing a `content` field inside the body payload:
+```
+POST /block
 ```
