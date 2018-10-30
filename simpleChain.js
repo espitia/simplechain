@@ -12,6 +12,8 @@ const app = express()
 const port = 8000;
 app.use(bodyParser.json())
 
+let validationWindowRegistry = {} // object to hold wallet/timestamp pairs to validate requests
+
 /* ===== Blockchain Class ==========================
 |  Class with a constructor for new blockchain 		|
 |  ================================================*/
