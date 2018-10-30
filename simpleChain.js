@@ -137,6 +137,37 @@ class Blockchain{
     }
 }
 
+app.get('/block/:block', (req, res) => {
+
+	// get current instance of blockchain
+	let blockChain = new Blockchain()
+
+	// get block
+	blockChain.getBlock(req.params.block)
+		.then(block => {
+			res.send(block) // reply with block
+		})
+		.catch(error => {
+			res.send(`There was an error retrieving the requested block. Please review the following error message:\n${error.message}`) // in case of error, reply with error message
+		})
+})
+
+app.post('/block', (req, res) => {
+
+	// get current instance of blockchain
+	let blockChain = new Blockchain()
+
+	if (req.body.content) {
+		blockChain.addBlock(new BlockClass.Block(req.body.content))
+			.then(block => res.send(block))
+			.catch(error => res.send(error.message))
+	} else {
+		res.send('Please provide a content field inside the body payload to produce a valid block.')
+	}
+})
+
+app.listen(port, () => console.log(`app listening on port ${port}!`))
+
 /* ===== TESTS ==========================*/
 
 let bchain = new Blockchain();
