@@ -139,6 +139,9 @@ class Blockchain{
     }
 }
 
+
+/* ===== API Routes ==========================*/
+
 app.get('/block/:block', (req, res) => {
 
 	// get current instance of blockchain
