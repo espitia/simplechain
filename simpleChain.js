@@ -6,6 +6,12 @@ const SHA256 = require('crypto-js/sha256');
 const db = require('./levelSandbox.js')
 const BlockClass = require('./Block.js')
 
+const bodyParser = require('body-parser');
+const express = require('express')
+const app = express()
+const port = 8000;
+app.use(bodyParser.json())
+
 /* ===== Blockchain Class ==========================
 |  Class with a constructor for new blockchain 		|
 |  ================================================*/
