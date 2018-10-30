@@ -168,6 +168,73 @@ app.post('/block', (req, res) => {
 	}
 })
 
+
+app.post('/requestValidation', (req, res) => {
+
+	if (req.body.walletAddress) {
+
+		let walletAddress = req.body.walletAddress;
+		let timestamp = Math.round(new Date().getTime()/1000)
+
+		// check if there is a valid request already (timestamp exsist for address and it is less than 500 seconds old)
+		if (validationWindowRegistry[walletAddress] &&  (timestamp - validationWindowRegistry[walletAddress]) < 500) {
+			let timeLeft = 500 - (timestamp - validationWindowRegistry[walletAddress])
+			res.send(`Your validation request for ${walletAddress} has ${timeLeft} seconds left. Please provide a valid signature to /message-signature/validate for the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`)
+		} else {
+
+			// if there is not valid request, create a new one
+			let response = {
+				address: walletAddress,
+				requestTimestamp: timestamp,
+				message: `${walletAddress}:${timestamp}:starRegistry`,
+				validationWindow: `Remaining time: 500 seconds`
+			}
+			validationWindowRegistry[walletAddress] = timestamp
+			res.send(response)
+		}
+	} else {
+		res.send('Please provide a walletAddress field inside the body payload to request access to the notary service.')
+	}
+})
+
+app.post('/message-signature/validate', (req, res) => {
+
+	// check if body has necessary input
+	if (req.body.walletAddress && req.body.messageSignature) {
+
+		// pull data from request and generate signature to check against
+		let walletAddress = req.body.walletAddress
+		let messageSignature = req.body.messageSignature
+		let signatureToValidate = SHA256(`${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`).toString()
+		let timeLeft = Math.round(500 - ((new Date().getTime()/1000) - validationWindowRegistry[walletAddress]))
+
+		// if signature is valid
+		if (signatureToValidate == messageSignature) {
+			let success = {
+				registerStar: true,
+				status: {
+					address: walletAddress,
+					requestTimeStamp: validationWindowRegistry[walletAddress],
+					message: `${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`,
+					validationWindow: timeLeft,
+					messageSignature: 'valid'
+				}	
+			}
+			res.send(success)
+		} else { // signature is invalid
+
+			// check if we have a valid address (with active request)
+			if (validationWindowRegistry[walletAddress]) { 
+				res.send(`Signature invalid. Please sign the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`)	
+			} else { // direct user to create a request 
+				res.send('Your wallet address does not have a valid request pending. Please generate a request using /requestValidation')
+			}	
+		}
+	} else { // request did not provide walletAddress and messageSignature fields
+		res.send('Please provide a walletAddress and messageSignature field to validate your signature.')
+	}
+})
+
 app.listen(port, () => console.log(`app listening on port ${port}!`))
 
 /* ===== TESTS ==========================*/
