@@ -117,7 +117,7 @@ app.post('/requestValidation', (req, res) => {
 		// check if there is a valid request already (timestamp exsist for address and it is less than 500 seconds old)
 		if (validationWindowRegistry[walletAddress] &&  (timestamp - validationWindowRegistry[walletAddress]) < 500) {
 			let timeLeft = 500 - (timestamp - validationWindowRegistry[walletAddress])
-			res.send(`Your validation request for ${walletAddress} has ${timeLeft} seconds left. Please provide a valid signature to /message-signature/validate for the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`)
+			res.send(`Your validation request for ${walletAddress} has ${timeLeft} seconds left. Please provide a valid signature to /message-signature/validate for the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry. Required fields are walletAddress and messageSignature`)
 		} else {
 
 			// if there is not valid request, create a new one
