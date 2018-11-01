@@ -151,19 +151,18 @@ function hexEncode(r){
 }
 
 
-function hexDecode(r){
-    var j;
-    var hexes = r.match(/.{1,4}/g) || [];
-    var back = "";
-    for(j = 0; j<hexes.length; j++) {
-        back += String.fromCharCode(parseInt(hexes[j], 16));
-    }
-    return back;
+function hexDecode(hex){
+	var hex = hex.toString();//force conversion
+	var str = '';
+	for (var i = 0; i < hex.length; i += 2)
+		str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+	return str;
 }
 
 function byteCount(s) {
     return encodeURI(s).split(/%..|./).length - 1;
 }
+
 /* ===== TESTS ==========================*/
 
 let bchain = new BlockchainClass.Blockchain();
