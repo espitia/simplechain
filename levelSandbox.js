@@ -59,7 +59,26 @@ function getBlocksWithAddress(_address) {
           console.log('Unable to read data stream!', err)
           reject(err)
         }).on('close', function() {
+          if (results.length == 0) reject(Error('No blocks were found for given address.'))
           resolve(results)
+        });
+  })  
+}
+
+// find blocks that have a given address as their body.address field
+function getBlockWithHash(_hash) {
+  return new Promise((resolve, reject) => {
+    let i = 0;
+    var block;
+    db.createReadStream().on('data', function(data) {
+          i++;
+          if (data.value.hash == _hash) block = data.value
+        }).on('error', function(err) {
+          console.log('Unable to read data stream!', err)
+          reject(err)
+        }).on('close', function() {
+          if (block) resolve(block)
+          reject(Error('No block was found with given hash. Make sure you have a valid hash.'))
         });
   })  
 }
@@ -83,6 +102,7 @@ module.exports.getBlockHeight = getBlockHeight;
 module.exports.getLevelDBData = getLevelDBData;
 module.exports.addDataToLevelDB = addDataToLevelDB;
 module.exports.getBlocksWithAddress = getBlocksWithAddress;
+module.exports.getBlockWithHash = getBlockWithHash;
 
 /* ===== Testing ==============================================================|
 |  - Self-invoking function to add blocks to chain                             |
