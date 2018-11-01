@@ -3,8 +3,8 @@
  * Comment and uncomment to test out different functionality
  */
 
-const BlockchainClass = require('./simpleChain.js')
-const BlockClass = require('./Block.js')
+const BlockchainClass = require('../Classes/Blockchain.js')
+const BlockClass = require('../Classes/Block.js')
 
 // INITIATE AN INSTANCE OF THE BLOCKCHAIN
 let blockchain = new BlockchainClass.Blockchain()
