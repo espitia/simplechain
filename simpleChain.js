@@ -28,6 +28,28 @@ app.get('/block/:block', (req, res) => {
 		})
 })
 
+
+app.get('/stars/address:walletAddress', (req, res) => {
+	
+	// get address from request
+	let address = req.params.walletAddress.slice(1,)
+	
+	// get current instance of blockchain
+	let blockchain = new BlockchainClass.Blockchain()
+	blockchain.getBlocksWithAddress(address)
+		.then(blocks => {
+			blocks.forEach(block => {
+				console.log(block)
+				block.body.star.storyDecoded = hexDecode(block.body.star.story)
+				console.log(block)
+			})
+			res.send(blocks)
+		})
+		.catch(error => {
+			throw new Error(error.message)
+		})
+})
+
 app.post('/block', (req, res) => {
 
 	// grab data from request
