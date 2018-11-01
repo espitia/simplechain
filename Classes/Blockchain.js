@@ -134,6 +134,14 @@ class Blockchain{
             throw new Error(error.message)
         }
     }
+
+    async getBlockWithHash(_hash) {
+        try {
+            return db.getBlockWithHash(_hash)
+        } catch (error) {
+            throw new Error(error.message)
+        }
+    }
 }
 
 
