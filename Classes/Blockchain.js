@@ -133,7 +133,8 @@ class Blockchain{
             let blocks = await db.getBlocksWithAddress(_address)
             blocks.forEach(block => {
 				block.body.star.storyDecoded = hexDecode(block.body.star.story)
-			})
+            })
+            return blocks
         } catch (error) {
             throw new Error(error.message)
         }
