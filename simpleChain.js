@@ -203,25 +203,3 @@ function hexDecode(hex){
 function byteCount(s) {
     return encodeURI(s).split(/%..|./).length - 1;
 }
-
-/* ===== TESTS ==========================*/
-
-let bchain = new BlockchainClass.Blockchain();
-
-// (function theLoop (i) {
-//     setTimeout(function () {
-//         let blockTest = new BlockClass.Block("Test Block - " + (i + 1));
-//         bchain.addBlock(blockTest).then((result) => {
-//             console.log(result);
-// 						console.log('\n\n\n')
-//             i++;
-//             if (i < 10) theLoop(i);
-//         });
-//     }, 3000);
-//   })(0);
-
-// bchain.addBlock(new BlockClass.Block('satoshi - 2009')).then(newBlock => { console.log(`new block has been added!`)}).catch(error => console.log(error))
-// bchain.getBlock(0).then(block => console.log(`Block retreived: \n`, block)).catch(error => console.log(error))
-// bchain.getBlockHeight().then(height => console.log(`Block height is: ${height}`)).catch(error => console.log(error))
-// bchain.validateBlockAtHeight(0).then(success => console.log(`Block was validated: ${success}`)).catch(error => console.log(error))
-// bchain.validateChain().then(success => console.log(`Chain was validated: ${success}`)).catch(error => console.log(error))
