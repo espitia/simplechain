@@ -1,10 +1,12 @@
-# Simple Chain
+## Simple Chain
 
-Project of the Udacity Blockchain Nanodegree course.
+Project for the Udacity Blockchain Nanodegree course.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+To get started, clone the repo `https://github.com/espitia/simplechain.git` and `npm install` to install dependencies. You can then run the chain:
+```node simpleChain.js```
+Your chain will now be deployed to a loca server on port `8000` when you can use the endpoints detailed in the endpoints section below. To add mockdata and test functionality, please review the Testing section below.
 
 ### Prerequisites
 
@@ -12,61 +14,101 @@ Installing Node and NPM is pretty straightforward using the installer package av
 
 ### Configuring your project
 
-- Make sure to install dependencies 
+Make sure to install dependencies. To build the RESTful API, we are using the following libraries:
+- express
+- body-parser
+
+Other dependencies include:
+- level
+- crypto-js
+
 
 ## Testing
 
-To test code:
-1: Open a command prompt or shell terminal after install node.js.
-2: Enter a node session, also known as REPL (Read-Evaluate-Print-Loop).
+Within the `tests.js`, you can test functionality by commenting/uncommenting the functions below. Simply comment/uncomment and run `node tests.js`:
+
+Add dummy blocks:
 ```
-node
+addBlocks()
 ```
-3: Copy and paste your code into your node session
-4: Instantiate blockchain with blockchain variable
+Adding a block:
 ```
-let blockchain = new Blockchain();
+blockchain.addBlock(new BlockClass.Block('satoshi - 2009'))
 ```
-5: Generate 10 blocks using a for loop *with a timer* in between blocks
+Retreiving blocks:
 ```
-(function theLoop (i) {
-    setTimeout(function () {
-        let blockTest = new BlockClass.Block("Test Block - " + (i + 1));
-        bchain.addBlock(blockTest).then((result) => {
-            console.log(result);
-						console.log('\n\n\n')
-            i++;
-            if (i < 10) theLoop(i);
-        });
-    }, 3000);
-  })(0);
+blockchain.getBlock(blockHeightToRetrieve)
 ```
-6: Validate blockchain
+Getting current block height:
 ```
-blockchain.validateChain();
+blockchain.getBlockHeight()
 ```
-7: Induce errors by changing block data
+Validating specific blocks:
 ```
-let inducedErrorBlocks = [2,4,7];
-for (var i = 0; i < inducedErrorBlocks.length; i++) {
-  blockchain.chain[inducedErrorBlocks[i]].data='induced chain error';
-}
+blockchain.validateBlockAtHeight(0)
 ```
-8: Validate blockchain. The chain should now fail with blocks 2,4, and 7.
+Validating entire chain:
 ```
-blockchain.validateChain();
+blockchain.validateChain()
 ```
 
 ## Endpoints
 
-There are two endpoints you can call to interact with the chain. 
+**POST Endpoints**
 
-Retrieve a block at a specified blockheight:
+Request validation of your address to be able to add stars to the blockchain. With a successful response, you will have a time window of 5 minutes to validate ownership (see below)
+
+```
+POST /requestValidation
+```
+*parameters:*
+```
+{
+   "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ"
+}
+```
+
+Validate ownership by providing a message signature with your address:
+
+```
+POST /message-signature/validate
+```
+*parameters:*
+```
+{
+  "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ",
+  "signature": "H6ZrGrF0Y4rMGBMRT2+hHWGbThTIyhBS0dNKQRov9Yg6GgXcHxtO9GJN4nwD2yNXpnXHTWU9i+qdw5vpsooryLU="
+}
+```
+
+Once validated, add stars to the blockchain:
+
+```
+POST /block
+```
+*parameters:*
+```
+{
+  "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ",
+  "star": {
+    "dec": "-26° 29'\'' 24.9",
+    "ra": "16h 29m 1.0s",
+    "story": "Found star using https://www.google.com/sky/"
+  }
+}
+```
+**GET Endpoints**
+
+Get a star block given the block height:
+
 ```
 GET /block/:blockHeight
 ```
-
-Generate a new block passing a `content` field inside the body payload:
+Get a star block using hash of block:
 ```
-POST /block
+/stars/hash:hash
+```
+Get a star block using a wallet address:
+```
+/stars/address:walletAddress
 ```
