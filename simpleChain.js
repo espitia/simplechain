@@ -30,15 +30,41 @@ app.get('/block/:block', (req, res) => {
 
 app.post('/block', (req, res) => {
 
-	// get current instance of blockchain
-	let blockChain = new Blockchain()
+	// grab data from request
+	let address = req.body.address
+	let star = req.body.star
+	let right_ascension = star.ra 
+	let declination = star.dec 
+	let magnitude = star.magnitude
+	let consetllation = star.consetllation
+	let story = star.story
 
-	if (req.body.content) {
-		blockChain.addBlock(new BlockClass.Block(req.body.content))
-			.then(block => res.send(block))
-			.catch(error => res.send(error.message))
-	} else {
-		res.send('Please provide a content field inside the body payload to produce a valid block.')
+	// check story size
+	if (byteCount(story) > 500) { res.send('The story field is limited to 500 bytes (250 words). Please reduce the size of your story'); return; }
+
+	if (address && star && right_ascension && declination && story) {
+		let blockchain = new BlockchainClass.Blockchain()
+
+		var body = {
+			address: address,
+			star: {
+				ra: right_ascension,
+				dec: declination,
+				story: Buffer.from(story, 'utf8').toString('hex')
+			}
+		}
+
+		// add optional fields if present
+		if (magnitude) body.star.magnitude = magnitude
+		if (consetllation) body.star.consetllation = consetllation
+
+		blockchain.addBlock(new BlockClass.Block(body))
+			.then(block => {
+				res.send(block)
+			})
+			.catch(error => {
+				throw new Error(error.message)
+			})
 	}
 })
 
