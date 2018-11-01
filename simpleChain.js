@@ -36,6 +36,8 @@ app.get('/stars/address:walletAddress', (req, res) => {
 	
 	// get current instance of blockchain
 	let blockchain = new BlockchainClass.Blockchain()
+
+	// get blocks with address
 	blockchain.getBlocksWithAddress(address)
 		.then(blocks => {
 			blocks.forEach(block => {
