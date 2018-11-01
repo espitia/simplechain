@@ -21,6 +21,7 @@ app.get('/block/:block', (req, res) => {
 	// get block
 	blockChain.getBlock(req.params.block)
 		.then(block => {
+			block.body.star.storyDecoded = hexDecode(block.body.star.story)
 			res.send(block) // reply with block
 		})
 		.catch(error => {
