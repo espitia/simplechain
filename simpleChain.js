@@ -137,6 +137,33 @@ app.post('/message-signature/validate', (req, res) => {
 
 app.listen(port, () => console.log(`app listening on port ${port}!`))
 
+
+/* ===== UTILITIES =====*/
+
+function hexEncode(r){
+    var hex, i;
+    var result = "";
+    for (i=0; i<this.length; i++) {
+        hex = r.charCodeAt(i).toString(16);
+        result += ("000"+hex).slice(-4);
+    }
+    return result
+}
+
+
+function hexDecode(r){
+    var j;
+    var hexes = r.match(/.{1,4}/g) || [];
+    var back = "";
+    for(j = 0; j<hexes.length; j++) {
+        back += String.fromCharCode(parseInt(hexes[j], 16));
+    }
+    return back;
+}
+
+function byteCount(s) {
+    return encodeURI(s).split(/%..|./).length - 1;
+}
 /* ===== TESTS ==========================*/
 
 let bchain = new BlockchainClass.Blockchain();
