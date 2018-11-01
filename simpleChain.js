@@ -1,4 +1,5 @@
 
+const BlockClass = require('./Classes/Block.js')
 const BlockchainClass = require('./Classes/Blockchain.js')
 
 const bodyParser = require('body-parser');
