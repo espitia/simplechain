@@ -41,14 +41,31 @@ app.get('/stars/address:walletAddress', (req, res) => {
 	blockchain.getBlocksWithAddress(address)
 		.then(blocks => {
 			blocks.forEach(block => {
-				console.log(block)
 				block.body.star.storyDecoded = hexDecode(block.body.star.story)
-				console.log(block)
 			})
 			res.send(blocks)
 		})
 		.catch(error => {
-			throw new Error(error.message)
+			res.send(error.message)
+		})
+})
+
+app.get('/stars/hash:hash', (req, res) => {
+	
+	// get address from request
+	let hash = req.params.hash.slice(1,)
+	
+	// get current instance of blockchain
+	let blockchain = new BlockchainClass.Blockchain()
+
+	// get blocks with address
+	blockchain.getBlockWithHash(hash)
+		.then(block => {
+			block.body.star.storyDecoded = hexDecode(block.body.star.story)
+			res.send(block)
+		})
+		.catch(error => {
+			res.send(error.message)
 		})
 })
 
