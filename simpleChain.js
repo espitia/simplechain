@@ -21,7 +21,6 @@ app.get('/block/:block', (req, res) => {
 	// get block
 	blockChain.getBlock(req.params.block)
 		.then(block => {
-			block.body.star.storyDecoded = hexDecode(block.body.star.story)
 			res.send(block) // reply with block
 		})
 		.catch(error => {
@@ -41,9 +40,6 @@ app.get('/stars/address:walletAddress', (req, res) => {
 	// get blocks with address
 	blockchain.getBlocksWithAddress(address)
 		.then(blocks => {
-			blocks.forEach(block => {
-				block.body.star.storyDecoded = hexDecode(block.body.star.story)
-			})
 			res.send(blocks)
 		})
 		.catch(error => {
@@ -53,16 +49,15 @@ app.get('/stars/address:walletAddress', (req, res) => {
 
 app.get('/stars/hash:hash', (req, res) => {
 	
-	// get address from request
+	// get hash from request
 	let hash = req.params.hash.slice(1,)
 	
 	// get current instance of blockchain
 	let blockchain = new BlockchainClass.Blockchain()
 
-	// get blocks with address
+	// get blocks with hash
 	blockchain.getBlockWithHash(hash)
 		.then(block => {
-			block.body.star.storyDecoded = hexDecode(block.body.star.story)
 			res.send(block)
 		})
 		.catch(error => {
@@ -179,28 +174,10 @@ app.post('/message-signature/validate', (req, res) => {
 
 app.listen(port, () => console.log(`app listening on port ${port}!`))
 
-
-/* ===== UTILITIES =====*/
-
-function hexEncode(r){
-    var hex, i;
-    var result = "";
-    for (i=0; i<this.length; i++) {
-        hex = r.charCodeAt(i).toString(16);
-        result += ("000"+hex).slice(-4);
-    }
-    return result
-}
-
-
-function hexDecode(hex){
-	var hex = hex.toString();//force conversion
-	var str = '';
-	for (var i = 0; i < hex.length; i += 2)
-		str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-	return str;
-}
-
+/**
+ * UTILITIES
+ */
+ 
 function byteCount(s) {
     return encodeURI(s).split(/%..|./).length - 1;
 }

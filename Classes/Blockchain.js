@@ -59,6 +59,7 @@ class Blockchain{
     // return object as a single string
           try {
               let block = await db.getLevelDBData(blockHeight)
+              block.body.star.storyDecoded = hexDecode(block.body.star.story)
               return block;
           } catch (error) {
               throw new Error(error.message)
@@ -129,7 +130,10 @@ class Blockchain{
   }
     async getBlocksWithAddress(_address) {
         try {
-            return db.getBlocksWithAddress(_address)
+            let blocks = await db.getBlocksWithAddress(_address)
+            blocks.forEach(block => {
+				block.body.star.storyDecoded = hexDecode(block.body.star.story)
+			})
         } catch (error) {
             throw new Error(error.message)
         }
@@ -137,12 +141,37 @@ class Blockchain{
 
     async getBlockWithHash(_hash) {
         try {
-            return db.getBlockWithHash(_hash)
+            let block = await db.getBlockWithHash(_hash)
+            block.body.star.storyDecoded = hexDecode(block.body.star.story)
+            return block
         } catch (error) {
             throw new Error(error.message)
         }
     }
 }
+
+/* ===== UTILITIES =====*/
+
+function hexEncode(r){
+    var hex, i;
+    var result = "";
+    for (i=0; i<this.length; i++) {
+        hex = r.charCodeAt(i).toString(16);
+        result += ("000"+hex).slice(-4);
+    }
+    return result
+}
+
+
+function hexDecode(hex){
+	var hex = hex.toString();//force conversion
+	var str = '';
+	for (var i = 0; i < hex.length; i += 2)
+		str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+	return str;
+}
+
+
 
 
 module.exports.Blockchain = Blockchain
