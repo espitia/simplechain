@@ -127,6 +127,13 @@ class Blockchain{
           throw new Error(error.message)
       }
   }
+    async getBlocksWithAddress(_address) {
+        try {
+            return db.getBlocksWithAddress(_address)
+        } catch (error) {
+            throw new Error(error.message)
+        }
+    }
 }
 
 

@@ -47,6 +47,23 @@ function addDataToLevelDB(value) {
   })
 }
 
+// find blocks that have a given address as their body.address field
+function getBlocksWithAddress(_address) {
+  return new Promise((resolve, reject) => {
+    let i = 0;
+    let results = []
+    db.createReadStream().on('data', function(data) {
+          i++;
+          if (data.value.body.address == _address) results.push(data.value)
+        }).on('error', function(err) {
+          console.log('Unable to read data stream!', err)
+          reject(err)
+        }).on('close', function() {
+          resolve(results)
+        });
+  })  
+}
+
 function getBlockHeight() {
   return new Promise ((resolve, reject) => {
     let i = 0
@@ -65,6 +82,7 @@ function getBlockHeight() {
 module.exports.getBlockHeight = getBlockHeight;
 module.exports.getLevelDBData = getLevelDBData;
 module.exports.addDataToLevelDB = addDataToLevelDB;
+module.exports.getBlocksWithAddress = getBlocksWithAddress;
 
 /* ===== Testing ==============================================================|
 |  - Self-invoking function to add blocks to chain                             |
