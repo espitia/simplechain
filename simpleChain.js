@@ -2,6 +2,8 @@
 const BlockClass = require('./Classes/Block.js')
 const BlockchainClass = require('./Classes/Blockchain.js')
 const SHA256 = require('crypto-js/sha256');
+const bitcoin = require('bitcoinjs-lib');
+const bitcoinMessage = require('bitcoinjs-message');
 
 const bodyParser = require('body-parser');
 const express = require('express')
