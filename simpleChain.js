@@ -27,6 +27,7 @@ app.get('/block/:block', (req, res) => {
 			res.send(block) // reply with block
 		})
 		.catch(error => {
+			res.status(500)
 			res.send(`There was an error retrieving the requested block. Please review the following error message:\n${error.message}`) // in case of error, reply with error message
 		})
 })
@@ -46,6 +47,7 @@ app.get('/stars/address:walletAddress', (req, res) => {
 			res.send(blocks)
 		})
 		.catch(error => {
+			res.status(500)
 			res.send(error.message)
 		})
 })
@@ -108,7 +110,8 @@ app.post('/block', (req, res) => {
 				res.send(block)
 			})
 			.catch(error => {
-				throw new Error(error.message)
+				res.status(500)
+				res.send(error.message)
 			})
 	}
 })
