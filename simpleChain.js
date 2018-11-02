@@ -12,7 +12,7 @@ const port = 8000;
 app.use(bodyParser.json())
 
 let validationWindowRegistry = {} // object to hold wallet/timestamp pairs to validate requests
-
+let validatedAddresses = [] // objec to hold validated addresses
 
 /* ===== API Routes ==========================*/
 
@@ -82,6 +82,9 @@ app.post('/block', (req, res) => {
 	// check story size
 	if (byteCount(story) > 500) { res.send('The story field is limited to 500 bytes (250 words). Please reduce the size of your story'); return; }
 
+	// make sure request has a validated address
+	if (!validatedAddresses.includes(address)) res.send('Address has not been validated. Please provide a valid signature to /message-signature/validate endpoint. Only one star can be added per validation.')
+
 	if (address && star && right_ascension && declination && story) {
 		let blockchain = new BlockchainClass.Blockchain()
 
@@ -100,6 +103,8 @@ app.post('/block', (req, res) => {
 
 		blockchain.addBlock(new BlockClass.Block(body))
 			.then(block => {
+				var index = validatedAddresses.indexOf(address);
+				if (index !== -1) validatedAddresses.splice(index, 1);
 				res.send(block)
 			})
 			.catch(error => {
@@ -116,10 +121,16 @@ app.post('/requestValidation', (req, res) => {
 		let walletAddress = req.body.walletAddress;
 		let timestamp = Math.round(new Date().getTime()/1000)
 
-		// check if there is a valid request already (timestamp exsist for address and it is less than 500 seconds old)
-		if (validationWindowRegistry[walletAddress] &&  (timestamp - validationWindowRegistry[walletAddress]) < 500) {
-			let timeLeft = 500 - (timestamp - validationWindowRegistry[walletAddress])
-			res.send(`Your validation request for ${walletAddress} has ${timeLeft} seconds left. Please provide a valid signature to /message-signature/validate for the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry. Required fields are walletAddress and messageSignature`)
+		// check if there is a valid request already (timestamp exsist for address and it is less than 300 seconds old)
+		if (validationWindowRegistry[walletAddress] &&  (timestamp - validationWindowRegistry[walletAddress]) < 300) {
+			let timeLeft = 300 - (timestamp - validationWindowRegistry[walletAddress])
+			let response = {
+				address: walletAddress,
+				requestTimestamp: timestamp,
+				message: `${walletAddress}:${timestamp}:starRegistry`,
+				validationWindow: timeLeft
+			}
+			res.send(response)
 		} else {
 
 			// if there is not valid request, create a new one
@@ -127,7 +138,7 @@ app.post('/requestValidation', (req, res) => {
 				address: walletAddress,
 				requestTimestamp: timestamp,
 				message: `${walletAddress}:${timestamp}:starRegistry`,
-				validationWindow: `Remaining time: 500 seconds`
+				validationWindow: 300
 			}
 			validationWindowRegistry[walletAddress] = timestamp
 			res.send(response)
@@ -145,11 +156,12 @@ app.post('/message-signature/validate', (req, res) => {
 		// pull data from request and generate signature to check against
 		let walletAddress = req.body.walletAddress
 		let messageSignature = req.body.messageSignature
-		let signatureToValidate = SHA256(`${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`).toString()
-		let timeLeft = Math.round(500 - ((new Date().getTime()/1000) - validationWindowRegistry[walletAddress]))
+		let message = `${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`
+
+		let timeLeft = Math.round(300 - ((new Date().getTime()/1000) - validationWindowRegistry[walletAddress]))
 
 		// if signature is valid
-		if (signatureToValidate == messageSignature) {
+		if (bitcoinMessage.verify(message, walletAddress, messageSignature)) {
 			let success = {
 				registerStar: true,
 				status: {
@@ -160,6 +172,7 @@ app.post('/message-signature/validate', (req, res) => {
 					messageSignature: 'valid'
 				}	
 			}
+			validatedAddresses.push(walletAddress)
 			res.send(success)
 		} else { // signature is invalid
 
