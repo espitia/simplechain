@@ -80,12 +80,17 @@ app.post('/block', (req, res) => {
 	let magnitude = star.magnitude
 	let consetllation = star.consetllation
 	let story = star.story
+	let timestamp = Math.round(new Date().getTime()/1000)
+
+	// check if story is ASCII 
+	if (!isASCII(star.story)) {res.send({error:'All characters in story must be ASCII'}); return;}
 
 	// check story size
-	if (byteCount(story) > 500) { res.send('The story field is limited to 500 bytes (250 words). Please reduce the size of your story'); return; }
+	if (byteCount(story) > 500) { res.send({error:'The story field is limited to 500 bytes (250 words). Please reduce the size of your story'}); return; }
 
 	// make sure request has a validated address
-	if (!validatedAddresses.includes(address)) res.send('Address has not been validated. Please provide a valid signature to /message-signature/validate endpoint. Only one star can be added per validation.')
+	if (!validatedAddresses.includes(address)) {res.send({error:'Address has not been validated. Please provide a valid signature to /message-signature/validate endpoint. Only one star can be added per validation.'}); return;}
+
 
 	if (address && star && right_ascension && declination && story) {
 		let blockchain = new BlockchainClass.Blockchain()
@@ -105,14 +110,21 @@ app.post('/block', (req, res) => {
 
 		blockchain.addBlock(new BlockClass.Block(body))
 			.then(block => {
+				// remove address from validated addresses to force address to generate a new request
 				var index = validatedAddresses.indexOf(address);
 				if (index !== -1) validatedAddresses.splice(index, 1);
+				// remove address from validation window (time keeping)
+				delete validationWindowRegistry[address]
 				res.send(block)
 			})
 			.catch(error => {
 				res.status(500)
 				res.send(error.message)
 			})
+	} else {
+		//incomplete request to post star
+		res.status(400)
+		res.send({error:'Incomplete request. Make sure all fields are provided (address, star, right_ascension, declination and story)'})
 	}
 })
 
@@ -126,16 +138,14 @@ app.post('/requestValidation', (req, res) => {
 
 		// check if there is a valid request already (timestamp exsist for address and it is less than 300 seconds old)
 		if (validationWindowRegistry[walletAddress] &&  (timestamp - validationWindowRegistry[walletAddress]) < 300) {
-			let timeLeft = 300 - (timestamp - validationWindowRegistry[walletAddress])
 			let response = {
 				address: walletAddress,
-				requestTimestamp: timestamp,
-				message: `${walletAddress}:${timestamp}:starRegistry`,
-				validationWindow: timeLeft
-			}
+				requestTimestamp: validationWindowRegistry[walletAddress],
+				message: `${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`,
+				validationWindow: 300
+			}			
 			res.send(response)
 		} else {
-
 			// if there is not valid request, create a new one
 			let response = {
 				address: walletAddress,
@@ -147,7 +157,7 @@ app.post('/requestValidation', (req, res) => {
 			res.send(response)
 		}
 	} else {
-		res.send('Please provide a walletAddress field inside the body payload to request access to the notary service.')
+		res.send({error:'Please provide a walletAddress field inside the body payload to request access to the notary service.'})
 	}
 })
 
@@ -161,8 +171,6 @@ app.post('/message-signature/validate', (req, res) => {
 		let messageSignature = req.body.messageSignature
 		let message = `${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`
 
-		let timeLeft = Math.round(300 - ((new Date().getTime()/1000) - validationWindowRegistry[walletAddress]))
-
 		// if signature is valid
 		if (bitcoinMessage.verify(message, walletAddress, messageSignature)) {
 			let success = {
@@ -171,23 +179,26 @@ app.post('/message-signature/validate', (req, res) => {
 					address: walletAddress,
 					requestTimeStamp: validationWindowRegistry[walletAddress],
 					message: `${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`,
-					validationWindow: timeLeft,
+					validationWindow: 300,
 					messageSignature: 'valid'
 				}	
 			}
-			validatedAddresses.push(walletAddress)
+			// check if address has already been validated to not add double, // if not, add to validated addresses array
+			var index = validatedAddresses.indexOf(walletAddress);
+			if (!(index !== -1)) validatedAddresses.push(walletAddress)
+			
 			res.send(success)
 		} else { // signature is invalid
 
 			// check if we have a valid address (with active request)
 			if (validationWindowRegistry[walletAddress]) { 
-				res.send(`Signature invalid. Please sign the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`)	
+				res.send({error:`Signature invalid. Please sign the following message: ${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`})	
 			} else { // direct user to create a request 
-				res.send('Your wallet address does not have a valid request pending. Please generate a request using /requestValidation')
+				res.send({error:'Your wallet address does not have a valid request pending. Please generate a request using /requestValidation'})
 			}	
 		}
 	} else { // request did not provide walletAddress and messageSignature fields
-		res.send('Please provide a walletAddress and messageSignature field to validate your signature.')
+		res.send({error:'Please provide a walletAddress and messageSignature field to validate your signature.'})
 	}
 })
 
@@ -199,4 +210,7 @@ app.listen(port, () => console.log(`app listening on port ${port}!`))
  
 function byteCount(s) {
     return encodeURI(s).split(/%..|./).length - 1;
+}
+function isASCII(str) {
+    return /^[\x00-\x7F]*$/.test(str);
 }
