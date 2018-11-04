@@ -136,13 +136,16 @@ app.post('/requestValidation', (req, res) => {
 		let walletAddress = req.body.walletAddress;
 		let timestamp = Math.round(new Date().getTime()/1000)
 
+
 		// check if there is a valid request already (timestamp exsist for address and it is less than 300 seconds old)
 		if (validationWindowRegistry[walletAddress] &&  (timestamp - validationWindowRegistry[walletAddress]) < 300) {
+			// countdown timer
+			let timeLeft = 300 - (timestamp - validationWindowRegistry[walletAddress])
 			let response = {
 				address: walletAddress,
 				requestTimestamp: validationWindowRegistry[walletAddress],
 				message: `${walletAddress}:${validationWindowRegistry[walletAddress]}:starRegistry`,
-				validationWindow: 300
+				validationWindow: timeLeft
 			}			
 			res.send(response)
 		} else {
