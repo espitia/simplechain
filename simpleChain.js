@@ -83,13 +83,22 @@ app.post('/block', (req, res) => {
 	let timestamp = Math.round(new Date().getTime()/1000)
 
 	// check if story is ASCII 
-	if (!isASCII(star.story)) {res.send({error:'All characters in story must be ASCII'}); return;}
+	if (!isASCII(star.story)) {
+		res.send({error:'All characters in story must be ASCII'})
+		return
+	}
 
 	// check story size
-	if (byteCount(story) > 500) { res.send({error:'The story field is limited to 500 bytes (250 words). Please reduce the size of your story'}); return; }
+	if (byteCount(story) > 500) { 
+		res.send({error:'The story field is limited to 500 bytes (250 words). Please reduce the size of your story'})
+		return
+	}
 
 	// make sure request has a validated address
-	if (!validatedAddresses.includes(address)) {res.send({error:'Address has not been validated. Please provide a valid signature to /message-signature/validate endpoint. Only one star can be added per validation.'}); return;}
+	if (!validatedAddresses.includes(address)) {
+		res.send({error:'Address has not been validated. Please provide a valid signature to /message-signature/validate endpoint. Only one star can be added per validation.'})
+		return
+	}
 
 
 	if (address && star && right_ascension && declination && story) {
